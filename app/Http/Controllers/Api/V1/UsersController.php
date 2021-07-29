@@ -26,7 +26,28 @@ class UsersController extends Controller
      */
     public function index(Request $request)
     {
-        $response = $this->userRepository->list();
+        $data = $request->only('page');
+
+        $response = $this->userRepository->list($data);
+
+        // Return Data with JSON
+        return $this->jsonResponse(200, 'Data Retrned Successfully', null, $response);
+    }
+    
+    /**
+     * Search for hotels in many providers
+     *
+     * @return JsonResource
+     */
+    public function search(Request $request)
+    {
+        $request->validate([
+            'firstName' =>  'required|string|min:1',
+        ]);
+
+        $data = $request->only(['page', 'firstName', 'lastName', 'email']);
+
+        $response = $this->userRepository->search($data);
 
         // Return Data with JSON
         return $this->jsonResponse(200, 'Data Retrned Successfully', null, $response);

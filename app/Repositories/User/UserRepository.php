@@ -2,12 +2,73 @@
 namespace App\Repositories\User;
 
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\Paginator;
 use App\Services\UserFactory\UserProvider;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Services\UserFactory\ProviderX\ProviderXFactory;
 use App\Services\UserFactory\ProviderY\ProviderYFactory;
 
 class UserRepository
 {
+    /**
+     * Fetch Users
+     *
+     * @return \Illuminate\Http\Response;
+     */
+    public function list($data)
+    {
+        $paginationData = $this->paginate($data);
+
+        return DB::select("SELECT * FROM users LIMIT {$paginationData['offset']}, {$paginationData['per_page']}");
+    }
+    
+    /**
+     * Fetch Users
+     *
+     * @return \Illuminate\Http\Response;
+     */
+    public function search($data)
+    {
+        $paginationData = $this->paginate($data);
+        $stm = "SELECT * FROM users";
+
+        $stm = $this->prepareSqlFilters($stm, $data);
+        
+        $stm .= " LIMIT {$paginationData['offset']}, {$paginationData['per_page']}";
+
+        return DB::select($stm);
+    }
+
+    /**
+     * @param string $st
+     * @param array $data
+     * 
+     * @return string
+     */
+    private function prepareSqlFilters(string $stm, array $data)
+    {
+        if (isset($data['firstName']) || isset($data['lastName']) || isset($data['email'])) {
+            $stm .= " WHERE ";
+        }
+
+        if (isset($data['firstName']) && !empty($data['firstName'])) {
+            $stm .= "first_name LIKE '%{$data['firstName']}%' ";
+        }
+
+        if (isset($data['lastName']) && !empty($data['lastName'])) {
+            $stm .= "OR last_name LIKE '%{$data['lastName']}%' ";
+        }
+
+        if (isset($data['email']) && !empty($data['email'])) {
+            $stm .= "OR email LIKE '%{$data['email']}%'";
+        }
+
+        return $stm;
+    }
+    
+    
     /**
      * Fetch Users
      *
@@ -60,6 +121,25 @@ class UserRepository
         // Save Users from Second API (Provider Y)
         $provider->setFactory(new ProviderYFactory());
         $provider->fetchUsers();
+    }
+
+
+    /**
+     * @param int $data
+     * @param int $perPage
+     * 
+     * @return array
+     */
+    private function paginate($data)
+    {
+        $perPage = 10;
+        $page = isset($data['page']) && !empty($data['page']) ? $data['page'] : 1;
+        $offset = ($page - 1) * $perPage;
+        
+        return [
+            'offset'    =>  $offset,
+            'per_page'    =>  $perPage,
+        ];
     }
 
 }
