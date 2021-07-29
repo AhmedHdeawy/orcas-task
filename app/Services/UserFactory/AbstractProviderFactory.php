@@ -22,7 +22,7 @@ interface AbstractProviderFactory
     /**
      * format and Validate Response
      *
-     * @return array $result
+     * @return void
      */
     public function handleData();
 

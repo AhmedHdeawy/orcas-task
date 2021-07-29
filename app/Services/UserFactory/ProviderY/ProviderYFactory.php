@@ -1,112 +1,95 @@
 <?php
 namespace App\Services\UserFactory\ProviderY;
 
-use Carbon\Carbon;
-use Illuminate\Support\Collection;
+use App\Services\UserFactory\Utility;
 use App\Services\UserFactory\AbstractProviderFactory;
 
 class ProviderYFactory implements AbstractProviderFactory
 {
-    private array $request;
-    private array $data;
-    private string $fileName = 'DataProviderY.json';
-    private Collection $result;
+    use Utility;
 
-    public function __construct(array $request)
+    private array $users;
+    private string $url = '';
+
+    public function __construct()
     {
-        $this->request = $request;
+        $this->url = config('endpoints.provider_y');
     }
 
     /**
-     * Get Data from File 
+     * Fetch User Data
      *
-     *
-     * @return void
+     * @return void $response
      */
-    public function loadFile()
+    public function fetchData(): void
     {
-        $this->data = json_decode(file_get_contents(app_path() . '/Data/' . $this->fileName), true);
+        // 1- Call API
+        $this->callApi();
+
+        // 2- Handle Data
+        $this->handleData();
+    }
+
+
+    /**
+     * Get Data from Api 
+     *
+     *
+     * @return void|bool
+     */
+    public function callApi()
+    {
+        // Call URL
+        $fetchUsers = $this->requestUsingCurl($this->url);
+
+        if (!$fetchUsers) {
+            return false;
+        }
+        // Get Data in array format
+        $this->users = json_decode($fetchUsers, true);
     }
 
     /**
      * Listing Process
      *
-     * @return array
+     * @return void
      */
-    public function list(): void
+    public function handleData(): void
     {
-        $data = collect($this->data);
+        // Get all users to save them in DB once
+        $usersToSave = [];
+        foreach ($this->users as $user) {
+            // Reformate Item
+            $user = $this->reFromateItem($user);
+            // Check Data Validation
+            $validate = $this->validateData($user);
+            // In case the data not valid, then ignore this USER
+            if (!$validate) {
+                continue;
+            }
 
-        $this->result = $this->applyFilters($data, $this->request);
+            $usersToSave[] = $user;
+        }
+
+        // Save All Filtered Users at Once
+        $this->saveUserData($usersToSave);
     }
 
 
     /**
-     * Apply Filters on Data
-     *
-     * @return array
-     */
-    public function applyFilters(Collection $collection, array $request): Collection
-    {
-        $data = $collection;
-
-        if (isset($request['statusCode']) && !empty($request['statusCode'])) {
-
-            $data = $data->where('status', $this->handleStatusCode($request['statusCode']));
-        }
-
-        if (isset($request['currency']) && !empty($request['currency'])) {
-            $data = $data->where('currency', $request['currency']);
-        }
-
-        if (isset($request['balanceMin']) && !empty($request['balanceMin'])) {
-            $data = $data->where('balance', '>=', $request['balanceMin']);
-        }
-
-        if (isset($request['balanceMax']) && !empty($request['balanceMax'])) {
-            $data = $data->where('balance', '<=', $request['balanceMax']);
-        }
-
-        return $data;
-    }
-
-    /**
-     * @param string $status
+     * @param array $item
      * 
-     * @return int
+     * @return array
      */
-    public function handleStatusCode(string $status)
+    public function reFromateItem(array $item): array
     {
-        if ($status == 'authorised') {
-            return 100;
-        } elseif ($status == 'decline') {
-            return 200;
-        } else {
-            return 300;
-        }
-    }
-
-    /**
-     * Get Response after Format
-     *
-     * @return mixed $jsonData
-     */
-    public function formateResult()
-    {
-        $result = collect();
-        // loop through result and reformat it
-        $this->result->map(function ($item) use ($result) {
-            $itemData = [
-                "amount" => $item['balance'],
-                "currency" => $item['currency'],
-                "email" => $item['email'],
-                "status_code" => $item['status'],
-                "date" => Carbon::createFromFormat('d/m/Y', $item['created_at'])->format('Y-m-d'),
-                "id" => $item['id'],
-            ];
-            $result->push($itemData);
-        });
-
-        return $result;
+        return [
+            'first_name'    =>  $item['fName'] ?? '',
+            'last_name'     =>  $item['lName'] ?? '',
+            'email'         =>  $item['email'] ?? '',
+            'avatar'        =>  $item['picture'] ?? '',
+            'created_at'    =>  now(),
+            'updated_at'    =>  now(),
+        ];
     }
 }

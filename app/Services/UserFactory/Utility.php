@@ -2,12 +2,12 @@
 
 namespace App\Services\UserFactory;
 
-use App\Exceptions\UrlException;
 use App\User;
 use Illuminate\Support\Facades\DB;
 
 trait Utility
 {
+
     /**
      * @param mixed $url
      * @param string $type
@@ -72,28 +72,6 @@ trait Utility
         return true;
     }
 
-
-    /**
-     * @param array $data
-     * 
-     * @return string
-     */
-    public function prepareForSaving(array $data)
-    {
-        $st = $this->concatenateText($data['first_name'], ",");
-        $st .= $this->concatenateText($data['last_name'], ",");
-        $st .= $this->concatenateText($data['email'], ",");
-        $st .= $this->concatenateText($data['avatar']);
-        
-        return $st;
-    }
-
-    public function concatenateText(string $string, $last = '')
-    {
-        return '"'. $string . '"' . $last;
-    }
-    
-    
     /**
      * @param array $data
      * 
@@ -101,9 +79,7 @@ trait Utility
      */
     public function saveUserData(array $data)
     {
-        
-        $sqlStm = implode(",", $data);
-        $this->saveUsingDB($sqlStm);
+        $this->saveUsingDB($data);
 
         // $this->saveUsingEloquent($data);
 
@@ -111,25 +87,13 @@ trait Utility
     }
 
     /**
-     * @param string $data
+     * @param array $data
      * 
      * @return void
      */
-    public function saveUsingDB(string $data)
+    public function saveUsingDB(array $data)
     {
-        DB::select("INSERT INTO `users`(`first_name`, `last_name`, `avatar`, `email`) VALUES {$data}");
-
-        // DB::insert(
-        //     'insert into users (first_name, last_name, email, avatar, created_at, updated_at) values (?, ?, ?, ?, ?, ?)',
-        //     [
-        //         $data['first_name'],
-        //         $data['last_name'],
-        //         $data['email'],
-        //         $data['avatar'],
-        //         now(),
-        //         now(),
-        //     ]
-        // );
+        DB::table('users')->insert($data);
     }
     /**
      * @param array $data
@@ -138,11 +102,6 @@ trait Utility
      */
     public function saveUsingEloquent(array $data)
     {
-        User::create([
-            $data['first_name'],
-            $data['last_name'],
-            $data['email'],
-            $data['avatar'],
-        ]);
+        User::insert($data);
     }
 }

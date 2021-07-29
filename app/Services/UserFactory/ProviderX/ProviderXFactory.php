@@ -1,8 +1,6 @@
 <?php
 namespace App\Services\UserFactory\ProviderX;
 
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use App\Services\UserFactory\Utility;
 use App\Services\UserFactory\AbstractProviderFactory;
 
@@ -54,10 +52,11 @@ class ProviderXFactory implements AbstractProviderFactory
     /**
      * Listing Process
      *
-     * @return array
+     * @return void
      */
-    public function handleData(): array
+    public function handleData(): void
     {
+        // Get all users to save them in DB once
         $usersToSave = [];
         foreach ($this->users as $user) {
             // Reformate Item
@@ -69,15 +68,11 @@ class ProviderXFactory implements AbstractProviderFactory
                 continue;
             }
 
-            $stm = $this->prepareForSaving($user);
-
-            $usersToSave[] = $stm;
+            $usersToSave[] = $user;
         }
 
         // Save All Filtered Users at Once
         $this->saveUserData($usersToSave);
-
-        return [];
     }
     
     
@@ -93,6 +88,8 @@ class ProviderXFactory implements AbstractProviderFactory
             'last_name'     =>  $item['lastName'] ?? '',
             'email'         =>  $item['email'] ?? '',
             'avatar'        =>  $item['avatar'] ?? '',
+            'created_at'    =>  now(),
+            'updated_at'    =>  now(),
         ];
     }
 }
