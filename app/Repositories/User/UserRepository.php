@@ -1,12 +1,8 @@
 <?php
 namespace App\Repositories\User;
 
-
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Pagination\Paginator;
 use App\Services\UserFactory\UserProvider;
-use Illuminate\Pagination\LengthAwarePaginator;
 use App\Services\UserFactory\ProviderX\ProviderXFactory;
 use App\Services\UserFactory\ProviderY\ProviderYFactory;
 
