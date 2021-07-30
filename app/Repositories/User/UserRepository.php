@@ -32,7 +32,7 @@ class UserRepository
     public function search($data)
     {
         $paginationData = $this->paginate($data);
-        $stm = "SELECT * FROM users";
+        $stm = "SELECT * FROM users WHERE ";
 
         $stm = $this->prepareSqlFilters($stm, $data);
         

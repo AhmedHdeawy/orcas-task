@@ -18,14 +18,14 @@ class VerifySubscriber
     {
         // Check that the api key is provided
         if (!$request->hasHeader('api-key')) {
-            return response()->json(['status'        => 401, 'message'       => "Unauthenticated"]);
+            return response()->json(['message'       => "Unauthenticated"], 401);
         }
 
         // Validate APi key
         $check = $this->verifyKey($request->header('api-key'));
         
         if (!$check) {
-            return response()->json(['status'        => 401, 'message'       => "Api Key Not Valid"]);
+            return response()->json(['message'       => "Api Key Not Valid"], 401);
         }
 
         return $next($request);
