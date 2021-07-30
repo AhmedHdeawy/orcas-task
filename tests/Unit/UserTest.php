@@ -14,7 +14,7 @@ class UserTest extends TestCase
     {
         parent::__construct();
 
-        $this->headers = [ "api-key" => "ac36c76e565e853378d35075aa24bd8f52f4ce4fee69bb6b2451dd0d6cdb9035"];
+        $this->headers = ["api-key" => "ac36c76e565e853378d35075aa24bd8f52f4ce4fee69bb6b2451dd0d6cdb9035"];
     }
 
     public function testApiAuth()
@@ -25,7 +25,7 @@ class UserTest extends TestCase
                 'message'
             ]);
     }
-    
+
     public function testFetchAllUsers()
     {
         $this->getJson(route('users.index'), $this->headers)
@@ -42,7 +42,7 @@ class UserTest extends TestCase
                 ]
             ]);
     }
-    
+
     public function testUsersSearch()
     {
         $this->getJson(route('users.search'), $this->headers)
@@ -60,250 +60,49 @@ class UserTest extends TestCase
             ]);
     }
 
-    public function testFetchAllUsersFromProviderX()
+    public function testUsersSearchWithFirstName()
     {
-        $params = [
-            'provider'  =>  'DataProviderX'
+        $data = [
+            'firstName' =>  'Aaron'
         ];
-        $this->getJson(route('list-all-users', $params))
+
+        $this->getJson(route('users.search', $data), $this->headers)
             ->assertStatus(200)
-            ->assertJson([
-                'data'  =>  ['total'   => 4]
-            ])
+            ->assertJsonPath('data.0.first_name'    ,  'Aaron')
             ->assertJsonStructure([
-                'status', 'message', 'errors',
-                'data'  =>  [
-                    'data'   => [
-                        0   =>  [
-                            'amount',
-                            'currency',
-                            'email',
-                            'status_code',
-                            'date',
-                            'id',
-                        ]
-                    ]
-                ]
+                'status', 'message', 'errors','data'
             ]);
+
+    }
+    
+    public function testUsersSearchWithLastName()
+    {
+        $data = [
+            'lastName' =>  'Huel'
+        ];
+
+        $this->getJson(route('users.search', $data), $this->headers)
+            ->assertStatus(200)
+            ->assertJsonPath('data.0.last_name'    ,  'Huel')
+            ->assertJsonStructure([
+                'status', 'message', 'errors','data'
+            ]);
+
+    }
+    
+    public function testUsersSearchWithEmail()
+    {
+        $data = [
+            'email' =>  'Electa.Sc54aefer@hotmail.com'
+        ];
+
+        $this->getJson(route('users.search', $data), $this->headers)
+            ->assertStatus(200)
+            ->assertJsonPath('data.0.email'    ,  'Electa.Sc54aefer@hotmail.com')
+            ->assertJsonStructure([
+                'status', 'message', 'errors','data'
+            ]);
+
     }
 
-    public function testFetchAllUsersFromProviderY()
-    {
-        $params = [
-            'provider'  =>  'DataProviderY'
-        ];
-        $this->getJson(route('list-all-users', $params))
-            ->assertStatus(200)
-            ->assertJson([
-                'data'  =>  ['total'   => 6]
-            ])
-            ->assertJsonStructure([
-                'status', 'message', 'errors',
-                'data'  =>  [
-                    'data'   => [
-                        0   =>  [
-                            'amount',
-                            'currency',
-                            'email',
-                            'status_code',
-                            'date',
-                            'id',
-                        ]
-                    ]
-                ]
-            ]);
-    }
-
-    public function testFetchAllUsersWithAuthorisedStatus()
-    {
-        $params = [
-            'statusCode'  =>  'authorised'
-        ];
-        $this->getJson(route('list-all-users', $params))
-            ->assertStatus(200)
-            ->assertJson([
-                'data'  =>  ['total'   => 3]
-            ])
-            ->assertJsonStructure([
-                'status', 'message', 'errors',
-                'data'  =>  [
-                    'data'   => [
-                        0   =>  [
-                            'amount',
-                            'currency',
-                            'email',
-                            'status_code',
-                            'date',
-                            'id',
-                        ]
-                    ]
-                ]
-            ]);
-    }
-
-    public function testFetchAllUsersWithDeclineStatus()
-    {
-        $params = [
-            'statusCode'  =>  'decline'
-        ];
-        $this->getJson(route('list-all-users', $params))
-            ->assertStatus(200)
-            ->assertJson([
-                'data'  =>  ['total'   => 4]
-            ])
-            ->assertJsonStructure([
-                'status', 'message', 'errors',
-                'data'  =>  [
-                    'data'   => [
-                        0   =>  [
-                            'amount',
-                            'currency',
-                            'email',
-                            'status_code',
-                            'date',
-                            'id',
-                        ]
-                    ]
-                ]
-            ]);
-    }
-
-
-    public function testFetchAllUsersWithRefundedStatus()
-    {
-        $params = [
-            'statusCode'  =>  'refunded'
-        ];
-        $this->getJson(route('list-all-users', $params))
-            ->assertStatus(200)
-            ->assertJson([
-                'data'  =>  ['total'   => 3]
-            ])
-            ->assertJsonStructure([
-                'status', 'message', 'errors',
-                'data'  =>  [
-                    'data'   => [
-                        0   =>  [
-                            'amount',
-                            'currency',
-                            'email',
-                            'status_code',
-                            'date',
-                            'id',
-                        ]
-                    ]
-                ]
-            ]);
-    }
-
-
-    public function testFetchAllUsersWithMinBalance()
-    {
-        $params = [
-            'balanceMin'  =>  100
-        ];
-        $this->getJson(route('list-all-users', $params))
-            ->assertStatus(200)
-            ->assertJson([
-                'data'  =>  ['total'   => 8]
-            ])
-            ->assertJsonStructure([
-                'status', 'message', 'errors',
-                'data'  =>  [
-                    'data'   => [
-                        0   =>  [
-                            'amount',
-                            'currency',
-                            'email',
-                            'status_code',
-                            'date',
-                            'id',
-                        ]
-                    ]
-                ]
-            ]);
-    }
-
-    public function testFetchAllUsersWithMaxBalance()
-    {
-        $params = [
-            'balanceMax'  =>  190
-        ];
-        $this->getJson(route('list-all-users', $params))
-            ->assertStatus(200)
-            ->assertJson([
-                'data'  =>  ['total'   => 6]
-            ])
-            ->assertJsonStructure([
-                'status', 'message', 'errors',
-                'data'  =>  [
-                    'data'   => [
-                        0   =>  [
-                            'amount',
-                            'currency',
-                            'email',
-                            'status_code',
-                            'date',
-                            'id',
-                        ]
-                    ]
-                ]
-            ]);
-    }
-
-    public function testFetchAllUsersWithAmountRange()
-    {
-        $params = [
-            'balanceMin'  =>  120,
-            'balanceMax'  =>  320
-        ];
-        $this->getJson(route('list-all-users', $params))
-            ->assertStatus(200)
-            ->assertJson([
-                'data'  =>  ['total'   => 5]
-            ])
-            ->assertJsonStructure([
-                'status', 'message', 'errors',
-                'data'  =>  [
-                    'data'   => [
-                        0   =>  [
-                            'amount',
-                            'currency',
-                            'email',
-                            'status_code',
-                            'date',
-                            'id',
-                        ]
-                    ]
-                ]
-            ]);
-    }
-
-
-    public function testFetchAllUsersWithCurrency()
-    {
-        $params = [
-            'currency'  =>  'AED'
-        ];
-        $this->getJson(route('list-all-users', $params))
-            ->assertStatus(200)
-            ->assertJson([
-                'data'  =>  ['total'   => 2]
-            ])
-            ->assertJsonStructure([
-                'status', 'message', 'errors',
-                'data'  =>  [
-                    'data'   => [
-                        0   =>  [
-                            'amount',
-                            'currency',
-                            'email',
-                            'status_code',
-                            'date',
-                            'id',
-                        ]
-                    ]
-                ]
-            ]);
-    }
 }

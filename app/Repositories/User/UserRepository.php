@@ -32,7 +32,7 @@ class UserRepository
     public function search($data)
     {
         $paginationData = $this->paginate($data);
-        $stm = "SELECT * FROM users WHERE ";
+        $stm = "SELECT * FROM users ";
 
         $stm = $this->prepareSqlFilters($stm, $data);
         
@@ -50,11 +50,11 @@ class UserRepository
     private function prepareSqlFilters(string $stm, array $data)
     {
         if (isset($data['firstName']) || isset($data['lastName']) || isset($data['email'])) {
-            $stm .= " WHERE ";
+            $stm .= " WHERE 1!=1 ";
         }
 
         if (isset($data['firstName']) && !empty($data['firstName'])) {
-            $stm .= "first_name LIKE '%{$data['firstName']}%' ";
+            $stm .= "OR first_name LIKE '%{$data['firstName']}%' ";
         }
 
         if (isset($data['lastName']) && !empty($data['lastName'])) {
